@@ -1,3 +1,4 @@
+
 <!doctype html>
 <!--
  @license
@@ -15,9 +16,11 @@
       src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
       crossorigin="anonymous"
     ></script>
+    <script async src="//cdn.jsdelivr.net/npm/prebid.js@latest/dist/not-for-prod/prebid.js"></script>
     <script>
       window.googletag = window.googletag || { cmd: [] };
-
+      var pbjs = pbjs || {};
+      pbjs.cmd = pbjs.cmd || [];
       let anchorSlot;
 
       googletag.cmd.push(() => {
@@ -53,7 +56,43 @@
 
         // Enable SRA and services.
         googletag.pubads().enableSingleRequest();
+        googletag.pubads().disableInitialLoad();
         googletag.enableServices();
+
+        //Prebid
+        pbjs.cmd.push(function() {
+          pbjs.addAdUnits([{code:'/6355419/Travel', mediaTypes:{banner:{sizes:[320, 50]}}, bids:[
+            {bidder:'appnexus',params:{placementId:13144370}},
+            {bidder:'rubicon',params:{accountId: 7780,siteId: 87184,zoneId: 413290}},
+            {bidder: '33across',params: {siteId: 'examplePub123', productId: 'siab|inview'}}
+          ]}]);
+
+          pbjs.setConfig({
+            debugging: {
+              enabled: true,
+              intercept: [
+                {
+                  when: {
+                    adUnitCode: '/6355419/Travel',
+                    bidder: 'rubicon'
+                  },
+                  then: {
+                    cpm: 9.99,
+                    height: 50,
+                    width: 320,
+                    Category: 'travel'
+                  }
+                },
+              ]
+            }
+          });
+         
+          pbjs.requestBids({bidsBackHandler:function(){
+            pbjs.setTargetingForGPTAsync();
+            googletag.pubads().refresh();
+          }});
+        });
+       
       });
     </script>
     <style></style>
@@ -61,15 +100,13 @@
   <body>
     <div id="page-content" style="height: 900vh">
       <h1 id="status">Anchor ads are not supported on this page.</h1>
-      <div id="static-ad-1" style="width: 100px; height: 100px"></div>
+      <div id="static-ad-1" style="width: 100px; height: 100px">
+        <script>
+          googletag.cmd.push(function() {
+              googletag.display("static-ad-1");
+          });
+        </script>
+      </div>
     </div>
-    <script>
-      googletag.cmd.push(() => {
-        // Ensure the first call to display comes after static ad slot
-        // divs are defined. If you do not have any static ad slots, this
-        // call can be made immediately after services are enabled.
-        googletag.display(anchorSlot);
-      });
-    </script>
   </body>
 </html>
